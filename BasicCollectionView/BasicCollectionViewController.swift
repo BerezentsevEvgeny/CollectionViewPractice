@@ -9,35 +9,68 @@ import UIKit
 
 private let reuseIdentifier = "Cell"
 
-private let items = [
-    "Alabama", "Alaska", "Arizona", "Arkansas", "California",
-    "Colorado", "Connecticut", "Delaware", "Florida",
-    "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
-    "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
-    "Massachusetts", "Michigan", "Minnesota", "Mississippi",
-    "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
-    "New Jersey", "New Mexico", "New York", "North Carolina",
-    "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
-    "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
-    "Texas", "Utah", "Vermont", "Virginia", "Washington",
-    "West Virginia", "Wisconsin", "Wyoming"
-]
 
-class BasicCollectionViewController: UICollectionViewController {
+class BasicCollectionViewController: UICollectionViewController, UISearchResultsUpdating {
+    
+    private let items = [
+        "Alabama", "Alaska", "Arizona", "Arkansas", "California",
+        "Colorado", "Connecticut", "Delaware", "Florida",
+        "Georgia", "Hawaii", "Idaho", "Illinois", "Indiana", "Iowa",
+        "Kansas", "Kentucky", "Louisiana", "Maine", "Maryland",
+        "Massachusetts", "Michigan", "Minnesota", "Mississippi",
+        "Missouri", "Montana", "Nebraska", "Nevada", "New Hampshire",
+        "New Jersey", "New Mexico", "New York", "North Carolina",
+        "North Dakota", "Ohio", "Oklahoma", "Oregon", "Pennsylvania",
+        "Rhode Island", "South Carolina", "South Dakota", "Tennessee",
+        "Texas", "Utah", "Vermont", "Virginia", "Washington",
+        "West Virginia", "Wisconsin", "Wyoming"
+    ]
+
+    // Добавляем SearchController()
+    let searchController = UISearchController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
         
+        // Задаем параметры контроллера
+        navigationItem.searchController = searchController
+        searchController.obscuresBackgroundDuringPresentation = false
+        searchController.searchResultsUpdater = self
+        
         collectionView.setCollectionViewLayout(generateLayout(), animated: false)
+    }
+    
+    // Логика фильтрации элементов
+    func updateSearchResults(for searchController: UISearchController) {
+        if let searchString = searchController.searchBar.text, searchString.isEmpty == false {
+            filteredItems = items.filter { (item) -> Bool in
+                item.localizedCaseInsensitiveContains(searchString)
+            }
+        } else {
+            filteredItems = items
+        }
+        
+//        let itemsByInitialLetter = filteredItems.reduce([:]) {
+//               existing, element in
+//                return existing.merging([element.first!:[element]]) { old,
+//                   new in
+//                    return old + new
+//                }
+//            }
+//            initialLetters = itemsByInitialLetter.keys.sorted()
+
+            collectionView.reloadData()
 
     }
     
-    //MARK: - Configuring Layout
+    // Массив отфильтрованных элементов
+    lazy var filteredItems: [String] = self.items
+    
+    //MARK: - Конфигурируем Layout
     private func generateLayout() -> UICollectionViewLayout {
-        // Add spacing property
+        
         let spacing: CGFloat = 10
         
-        // Configure Item
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .fractionalHeight(1.0))
@@ -47,49 +80,35 @@ class BasicCollectionViewController: UICollectionViewController {
         item.contentInsets = NSDirectionalEdgeInsets(
             top: 0, leading: spacing, bottom: 0, trailing: spacing)
         
-        // Configure Group
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .absolute(70.0))
         
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
-            subitem: item, count: 1)
+            subitem: item, count: 2)
         
         group.contentInsets = NSDirectionalEdgeInsets(top: spacing, leading: spacing, bottom: 0, trailing: spacing)
-        
-        // Configure Section
+ 
         let section = NSCollectionLayoutSection(group: group)
         section.interGroupSpacing = spacing
 
-        // Return layout
         let layout = UICollectionViewCompositionalLayout(section: section)
         return layout
     }
     
-    
 
-    /*
-    // MARK: - Navigation
-
-    // In a storyboard-based application, you will often want to do a little preparation before navigation
-    override func prepare(for segue: UIStoryboardSegue, sender: Any?) {
-        // Get the new view controller using [segue destinationViewController].
-        // Pass the selected object to the new view controller.
-    }
-    */
-
-    // MARK: - UICollectionViewDataSource
+    // MARK: - DataSource
 
     override func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
 
-        return items.count
+        return filteredItems.count
     }
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! BasicCollectionViewCell
     
-        cell.label.text = items[indexPath.item]
+        cell.label.text = filteredItems[indexPath.item]
     
         return cell
     }

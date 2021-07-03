@@ -9,9 +9,12 @@ import UIKit
 
 private let reuseIdentifier = "Cell"
 
-
 class BasicCollectionViewController: UICollectionViewController, UISearchResultsUpdating {
+     
+    let searchController = UISearchController()
     
+    lazy var filteredItems: [String] = self.items
+
     private let items = [
         "Alabama", "Alaska", "Arizona", "Arkansas", "California",
         "Colorado", "Connecticut", "Delaware", "Florida",
@@ -25,9 +28,6 @@ class BasicCollectionViewController: UICollectionViewController, UISearchResults
         "Texas", "Utah", "Vermont", "Virginia", "Washington",
         "West Virginia", "Wisconsin", "Wyoming"
     ]
-
-    // Добавляем SearchController()
-    let searchController = UISearchController()
 
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -49,45 +49,30 @@ class BasicCollectionViewController: UICollectionViewController, UISearchResults
         } else {
             filteredItems = items
         }
-        
-//        let itemsByInitialLetter = filteredItems.reduce([:]) {
-//               existing, element in
-//                return existing.merging([element.first!:[element]]) { old,
-//                   new in
-//                    return old + new
-//                }
-//            }
-//            initialLetters = itemsByInitialLetter.keys.sorted()
 
             collectionView.reloadData()
 
     }
     
-    // Массив отфильтрованных элементов
-    lazy var filteredItems: [String] = self.items
+
     
     //MARK: - Конфигурируем Layout
     private func generateLayout() -> UICollectionViewLayout {
-        
         let spacing: CGFloat = 10
         
         let itemSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .fractionalHeight(1.0))
-        
         let item = NSCollectionLayoutItem(layoutSize: itemSize)
-        
         item.contentInsets = NSDirectionalEdgeInsets(
             top: 0, leading: spacing, bottom: 0, trailing: spacing)
         
         let groupSize = NSCollectionLayoutSize(
             widthDimension: .fractionalWidth(1.0),
             heightDimension: .absolute(70.0))
-        
         let group = NSCollectionLayoutGroup.horizontal(
             layoutSize: groupSize,
             subitem: item, count: 2)
-        
         group.contentInsets = NSDirectionalEdgeInsets(top: spacing, leading: spacing, bottom: 0, trailing: spacing)
  
         let section = NSCollectionLayoutSection(group: group)
@@ -107,9 +92,9 @@ class BasicCollectionViewController: UICollectionViewController, UISearchResults
 
     override func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: reuseIdentifier, for: indexPath) as! BasicCollectionViewCell
-    
+
         cell.label.text = filteredItems[indexPath.item]
-    
+
         return cell
     }
 
